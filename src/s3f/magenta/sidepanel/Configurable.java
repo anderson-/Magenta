@@ -6,7 +6,6 @@
 
 package s3f.magenta.sidepanel;
 
-import s3f.magenta.GraphicObject;
 import s3f.magenta.swing.WidgetContainer;
 
 /**

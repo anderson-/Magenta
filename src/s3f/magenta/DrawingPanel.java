@@ -29,6 +29,7 @@ import s3f.magenta.swing.WidgetContainer;
 import s3f.magenta.util.QuickFrame;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
@@ -53,11 +54,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import javax.swing.JPanel;
-import s3f.magenta.Drawable;
 import s3f.magenta.swing.component.Widget;
 import java.awt.Shape;
 import java.awt.geom.Line2D;
 import java.awt.geom.Rectangle2D;
+import javax.swing.UIManager;
 import s3f.util.trafficsimulator.Clock;
 
 /**
@@ -79,8 +80,6 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
     private final ArrayList<Integer> keys;
     private final Point mouse;
     private boolean dragEnabled = true;
-    private boolean keyMoveEnabled = true;
-    private int keyMoveConst = 10;
     private boolean dragging = false;
     private int mouseDragX = 0;
     private int mouseDragY = 0;
@@ -90,6 +89,8 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
     protected int width;
     protected int height;
     private int globalX = 0, globalY = 0;
+    protected boolean keyMoveEnabled = true;
+    protected int keyMoveConst = 10;
     protected boolean zoomEnabled = true;
     protected boolean midMouseButtonResetView = true;
     protected double zoom = 1.0;
@@ -176,7 +177,6 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
         width = this.getWidth(); //TODO: trocar listener para mainTabbedPane
         height = this.getHeight();
         if (width <= 0 || height <= 0) {
-            System.out.println("f");
             width = 1;
             height = 1;
         }
@@ -236,7 +236,7 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
             }
         }
     }
-    
+
     public final void add2(Drawable d) {
         if (d != null) {
             synchronized (objects) {
@@ -290,14 +290,11 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
         g1.setColor(Color.WHITE);
         g1.fillRect(0, 0, width, height);
 
-        //desenha o buffer no painel
-        g.drawImage(buffer, 0, 0, null);
-
         //relogio global
         clock.increase();
 
         //converte Graphics para Graphics2D
-        Graphics2D g2 = (Graphics2D) g;
+        Graphics2D g2 = (Graphics2D) g1;
         originalTransform = g2.getTransform();
 
         //deixa tudo lindo (antialiasing)
@@ -395,10 +392,15 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
                         currentTransform.scale(zoom, zoom);
                     }
                     currentTransform.translate(d.getPosX(), d.getPosY());
+                    Font font = UIManager.getDefaults().getFont("TabbedPane.font");
+                    c.getJComponent().setFont(font.deriveFont(font.getSize() * (float) zoom));
                     c.getJComponent().setBounds(currentTransform.createTransformedShape(c.getBounds()).getBounds());
                 }
             }
         }
+
+        //desenha o buffer no painel
+        g.drawImage(buffer, 0, 0, null);
 
 //        int x = (int) ((mouse.x - globalX) / zoom);
 //        int y = (int) ((mouse.y - globalY) / zoom);

@@ -239,7 +239,7 @@ public class Item implements GraphicObject {
         Rectangle2D stringBounds = font.getStringBounds(name, g.getFontRenderContext());
 
         x = maxIconWidth + 2 * insetX;
-        y = maxHeight / 2 + stringBounds.getHeight() / 2 - 2;
+        y = maxHeight / 2 + stringBounds.getHeight() / 2 ;
 
         g.setColor(color.darker());
         g.translate(x, y);

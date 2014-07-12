@@ -16,6 +16,7 @@ import javax.swing.UIManager;
 import s3f.magenta.swing.WidgetContainer;
 import s3f.magenta.GraphicObject;
 import s3f.magenta.DrawingPanel;
+import s3f.util.ColorUtils;
 
 /**
  *
@@ -71,7 +72,7 @@ public class SidePanel extends WidgetContainer {
     public void clearTempPanel() {
         tmpItens.clear();
     }
-    
+
     public void clearPanel() {
         itens.clear();
     }
@@ -122,7 +123,7 @@ public class SidePanel extends WidgetContainer {
         int y = 10 + panelItensY;
         int wtmp = panelWidth;
         panelWidth = 0;
-        ArrayList<GraphicObject> itensTmp = (ArrayList<GraphicObject>) itens.clone();
+        ArrayList<GraphicObject> itensTmp = new ArrayList<>(itens);
         for (GraphicObject i : itensTmp) {
 
 //                g.setColor(Color.GREEN);
@@ -131,7 +132,7 @@ public class SidePanel extends WidgetContainer {
                 i.setLocation(x, y);
                 i.draw(g, ga, in);
             } else {
-                i.setLocation(x + drawingPanel.getWidth() - panelWidth, y);
+                i.setLocation(x + ga.getWidth() - panelWidth, y);
                 AffineTransform t = ga.getT(g.getTransform());
                 g.translate(x, y);
                 i.draw(g, ga, in);
@@ -150,16 +151,13 @@ public class SidePanel extends WidgetContainer {
             panelWidth = wtmp;
         }
 
-        panelItensHeight = y - panelItensY + 30;
+        if (!tmp) {
+            panelItensHeight = y - panelItensY;
+        }
     }
 
     @Override
     public void drawTopLayer(Graphics2D g, DrawingPanel.GraphicAttributes ga, DrawingPanel.InputState in) {
-        g.setStroke(new BasicStroke());
-
-        g.setColor(Color.white);
-        g.fill(closeBtn);
-        g.setColor(color);
 
         if (in.mouseGeneralClick() && closeBtn.contains(in.getRelativeMouse())) {
             if (!(animOpen || animClose)) {
@@ -177,7 +175,7 @@ public class SidePanel extends WidgetContainer {
             ga.setZoomEnabled(false);
             ga.setDragEnabled(false);
 //            panelItensY -= in.getMouseDrag().y;
-            panelItensY += in.getMouseWheelRotation() * 20;
+            panelItensY += in.getMouseWheelRotation() * 15;
             panelItensY = (panelItensY < (ga.getHeight() - panelItensHeight)) ? (ga.getHeight() - panelItensHeight) : panelItensY;
             panelItensY = (panelItensY > 0) ? 0 : panelItensY;
         } else {
@@ -194,7 +192,13 @@ public class SidePanel extends WidgetContainer {
 
         g.setFont(Item.getFont());
 
+        g.setClip(-20, (int) closeBtn.y, 20, 25);
+        g.setStroke(new BasicStroke());
+        g.setColor(ColorUtils.setAlpha(Color.white, .8f));
+        g.fill(closeBtn);
+        g.setColor(ColorUtils.setAlpha(color, .8f));
         g.draw(closeBtn);
+        g.setClip(null);
 
         if (open) {
             g.translate(-8, 20);
@@ -224,8 +228,8 @@ public class SidePanel extends WidgetContainer {
         double velocity = .2; //em segundos
         velocity = ga.getClock().getDt() * panelWidth / velocity;//converte para px/s dS=dt*(S/t) => dS/dt=v=(S/t) => S=v*t
 
-        //set drawing bounds?
-//        g.setClip(0, 0, panelWidth, ga.getHeight());
+        //set drawing bounds
+        g.setClip(0, 0, (int) (ga.getWidth() - bounds.x), ga.getHeight());
         if (switchAnim) {
             hideSwing(true);
             if (animLeft) {
@@ -254,16 +258,19 @@ public class SidePanel extends WidgetContainer {
         drawItens(g, ga, in, itens, false);
         drawItens(g, ga, in, tmpItens, true);
 
-//        g.setClip(null);
-
+        g.setClip(null);
         //scrollbar
-        if (ga.getHeight() != 0 && panelItensHeight != 0) {
+        //if (ga.getHeight() != 0 && panelItensHeight != 0) {
+        g.setColor(Color.white);
+        int scrollbarW = 3;
+        if (panelItensHeight > ga.getHeight() && ga.getHeight() > 0) {
             //tamanho_da_barra = area_visivel/tamanho_do_conteudo*tamanho_fixo_da_barra
             double barSize = ga.getHeight() / (double) panelItensHeight * ga.getHeight();
             //posição_da_barra = posição_do_conteudo/tamanho_do_conteudo*area_visivel
             double barMidPos = -panelItensY / (double) panelItensHeight * ga.getHeight();
-            g.setColor(Color.white);
-            g.fillRect(panelWidth - 2, (int) barMidPos, 2, (int) barSize);
+            g.fillRect(panelWidth - scrollbarW, (int) barMidPos, scrollbarW, (int) barSize);
+        } else {
+            g.fillRect(panelWidth - scrollbarW, 0, scrollbarW, ga.getHeight());
         }
 
         if (animOpen) {
@@ -342,9 +349,6 @@ public class SidePanel extends WidgetContainer {
             }
             if (i instanceof WidgetContainer) {
                 drawingPanel.add(i);
-//                if (i instanceof MutableWidgetContainer) { TODO
-//                    ((MutableWidgetContainer) i).setAbsolute(true);
-//                }
             }
         }
     }
@@ -363,9 +367,6 @@ public class SidePanel extends WidgetContainer {
                         }
                         if (i instanceof WidgetContainer) {
                             drawingPanel.add(i);
-//                            if (i instanceof MutableWidgetContainer) { TODO
-//                                ((MutableWidgetContainer) i).setAbsolute(true);
-//                            }
                         }
                     }
                 } else {
