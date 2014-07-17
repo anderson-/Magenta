@@ -12,10 +12,11 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import javax.swing.UIManager;
-import s3f.magenta.swing.WidgetContainer;
-import s3f.magenta.GraphicObject;
 import s3f.magenta.DrawingPanel;
+import s3f.magenta.GraphicObject;
+import s3f.magenta.swing.WidgetContainer;
 import s3f.util.ColorUtils;
 
 /**
@@ -75,6 +76,10 @@ public class SidePanel extends WidgetContainer {
 
     public void clearPanel() {
         itens.clear();
+    }
+    
+    public List<GraphicObject> getItens(){
+        return itens;
     }
 
     boolean switchAnim = false;

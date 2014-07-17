@@ -267,7 +267,6 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
         if (d instanceof WidgetContainer) {
             for (Widget w : ((WidgetContainer) d)) {
                 super.remove(w.getJComponent());
-//                System.out.println(this.countComponents());
             }
         }
         synchronized (objects) {
@@ -345,6 +344,7 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
                 //g2.setClip(currentBounds); usar limite de pintura
                 g2.setTransform(currentTransform);
                 d.draw(g2, currentGraphicAtributes, currentInputState);
+//                g2.drawString(d.toString(), 0, 0);
             }
             currentObject = null;
         }
@@ -898,6 +898,10 @@ public class DrawingPanel extends JPanel implements KeyListener, MouseListener, 
                     return 0;
                 }
             }
+        }
+
+        public boolean isMouseDragged() {
+            return dragging;
         }
 
         public boolean isMouseOver() {
